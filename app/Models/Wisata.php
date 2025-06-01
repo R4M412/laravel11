@@ -7,10 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 class Wisata extends Model
 {
     protected $fillable =[
-        'nama_wisata',
+        'gambar_thumbnail',
+        'gambar_wisata',
+        'judul',
         'deskripsi',
-        'alamat',
+        'harga_paket',
+        'transportasi',
+        'itenary',
         'fasilitas',
-        'kategori',
+        'remarks',
+        'additional',
+    ];
+
+    protected $casts = [
+        'gambar_wisata' => 'array', // karena json di database
+        'harga_paket' => 'float',
     ];
 }
