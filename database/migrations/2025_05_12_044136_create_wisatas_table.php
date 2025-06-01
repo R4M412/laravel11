@@ -10,14 +10,16 @@ return new class extends Migration
     {
         Schema::create('wisatas', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
-            $table->text('deskripsi')->nullable();
-            $table->string('alamat')->nullable();
-            $table->string('gambar')->nullable(); // path gambar
-            $table->decimal('harga_tiket', 10, 2)->nullable();
-            $table->string('jam_buka')->nullable();
-            $table->json('fasilitas')->nullable();
-            $table->string('kategori')->nullable();
+            $table->string('gambar_thumbnail')->nullable();
+            $table->json('gambar_wisata')->nullable(); // untuk multiple images
+            $table->string('judul');
+            $table->text('deskripsi');
+            $table->decimal('harga_paket', 15, 2);
+            $table->string('transportasi')->nullable();
+            $table->string('itenary')->nullable();
+            $table->text('fasilitas')->nullable();
+            $table->string('remarks')->nullable();
+            $table->string('additional')->nullable();
             $table->timestamps();
         });
     }
