@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::create('hotel_cost_details', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->decimal('single_sup', 15, 2)->nullable();
             $table->timestamps();
-        }); // <--- INI PERBAIKANNYA
+        });
     }
 
     /**
