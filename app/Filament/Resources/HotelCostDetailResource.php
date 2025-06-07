@@ -23,15 +23,41 @@ class HotelCostDetailResource extends Resource
     {
         return $form
             ->schema([
-            Forms\Components\TextInput::make('hotel_name')->required(),
-            Forms\Components\TextInput::make('star_rating')->numeric()->required(),
-            Forms\Components\TextInput::make('price_50_pax')->numeric()->required(),
-            Forms\Components\TextInput::make('price_11_12_pax')->numeric()->required(),
-            Forms\Components\TextInput::make('price_8_10_pax')->numeric()->required(),
-            Forms\Components\TextInput::make('price_6_7_pax')->numeric()->required(),
-            Forms\Components\TextInput::make('price_3_5_pax')->numeric()->required(),
-            Forms\Components\TextInput::make('price_2_pax')->numeric()->required(),
-            Forms\Components\TextInput::make('single_sup')->numeric()->required(),
+             Forms\Components\TextInput::make('hotel_name')
+                ->label('Hotel Name')
+                ->required(),
+            Forms\Components\TextInput::make('star_rating')
+                ->label('Star Rating')
+                ->numeric()
+                ->required(),
+            Forms\Components\TextInput::make('price_50_pax')
+                ->label('Price 50 pax')
+                ->numeric()
+                ->required(),
+            Forms\Components\TextInput::make('price_11_12_pax')
+                ->label('Price 11–12 pax')
+                ->numeric()
+                ->required(),
+            Forms\Components\TextInput::make('price_8_10_pax')
+                ->label('Price 8–10 pax')
+                ->numeric()
+                ->required(),
+            Forms\Components\TextInput::make('price_6_7_pax')
+                ->label('Price 6–7 pax')
+                ->numeric()
+                ->required(),
+            Forms\Components\TextInput::make('price_3_5_pax')
+                ->label('Price 3–5 pax')
+                ->numeric()
+                ->required(),
+            Forms\Components\TextInput::make('price_2_pax')
+                ->label('Price 2 pax')
+                ->numeric()
+                ->required(),
+            Forms\Components\TextInput::make('single_sup')
+                ->label('Single Sup')
+                ->numeric()
+                ->required(),
             ]);
     }
 
@@ -39,16 +65,16 @@ class HotelCostDetailResource extends Resource
     {
         return $table
             ->columns([
-            Tables\Columns\TextColumn::make('hotel_name')->searchable(),
-            Tables\Columns\TextColumn::make('star_rating'),
-            Tables\Columns\TextColumn::make('price_50_pax'),
-            Tables\Columns\TextColumn::make('price_11_12_pax'),
-            Tables\Columns\TextColumn::make('price_8_10_pax'),
-            Tables\Columns\TextColumn::make('price_6_7_pax'),
-            Tables\Columns\TextColumn::make('price_3_5_pax'),
-            Tables\Columns\TextColumn::make('price_2_pax'),
-            Tables\Columns\TextColumn::make('single_sup'),
-            Tables\Columns\TextColumn::make('created_at')->dateTime(),
+            Tables\Columns\TextColumn::make('hotel_name')->label('Hotel Name')->searchable(),
+            Tables\Columns\TextColumn::make('star_rating')->label('Star Rating'),
+            Tables\Columns\TextColumn::make('price_50_pax')->label('Price 50 pax'),
+            Tables\Columns\TextColumn::make('price_11_12_pax')->label('Price 11–12 pax'),
+            Tables\Columns\TextColumn::make('price_8_10_pax')->label('Price 8–10 pax'),
+            Tables\Columns\TextColumn::make('price_6_7_pax')->label('Price 6–7 pax'),
+            Tables\Columns\TextColumn::make('price_3_5_pax')->label('Price 3–5 pax'),
+            Tables\Columns\TextColumn::make('price_2_pax')->label('Price 2 pax'),
+            Tables\Columns\TextColumn::make('single_sup')->label('Single Sup'),
+            Tables\Columns\TextColumn::make('created_at')->label('Created')->dateTime(),
             ])
             ->filters([
                 //
