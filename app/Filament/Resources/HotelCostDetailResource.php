@@ -3,61 +3,71 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\HotelCostDetailResource\Pages;
-use App\Filament\Resources\HotelCostDetailResource\RelationManagers;
 use App\Models\HotelCostDetail;
-use Filament\Forms;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class HotelCostDetailResource extends Resource
 {
     protected static ?string $model = HotelCostDetail::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-library';
+    protected static ?string $navigationLabel = 'Hotel Cost Details';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-             Forms\Components\TextInput::make('hotel_name')
-                ->label('Hotel Name')
-                ->required(),
-            Forms\Components\TextInput::make('star_rating')
-                ->label('Star Rating')
-                ->numeric()
-                ->required(),
-            Forms\Components\TextInput::make('price_50_pax')
-                ->label('Price 50 pax')
-                ->numeric()
-                ->required(),
-            Forms\Components\TextInput::make('price_11_12_pax')
-                ->label('Price 11–12 pax')
-                ->numeric()
-                ->required(),
-            Forms\Components\TextInput::make('price_8_10_pax')
-                ->label('Price 8–10 pax')
-                ->numeric()
-                ->required(),
-            Forms\Components\TextInput::make('price_6_7_pax')
-                ->label('Price 6–7 pax')
-                ->numeric()
-                ->required(),
-            Forms\Components\TextInput::make('price_3_5_pax')
-                ->label('Price 3–5 pax')
-                ->numeric()
-                ->required(),
-            Forms\Components\TextInput::make('price_2_pax')
-                ->label('Price 2 pax')
-                ->numeric()
-                ->required(),
-            Forms\Components\TextInput::make('single_sup')
-                ->label('Single Sup')
-                ->numeric()
-                ->required(),
+                Section::make('Informasi Utama Hotel')->schema([
+                    // Field ini HARUS cocok dengan nama kolom di migrasi Anda
+                    TextInput::make('name')
+                        ->label('Hotel (Nama & Bintang)')
+                        ->placeholder('Contoh: Citra Dream / Amaris *2')
+                        ->required()
+                        ->columnSpanFull(),
+
+                    // Field ini HARUS cocok dengan nama kolom di migrasi Anda
+                    TextInput::make('single_sup')
+                        ->label('Single Supplement')
+                        ->numeric()
+                        ->prefix('IDR')
+                        ->required(),
+                ]),
+
+                Section::make('Tingkatan Harga per Orang (Pax)')->schema([
+                    // Repeater ini HARUS menunjuk ke NAMA RELASI di model Anda
+                    Repeater::make('priceRules') // <--- NAMA RELASI
+                        ->relationship() // <--- INI KUNCINYA
+                        ->label('Aturan Harga')
+                        ->schema([
+                            // Field ini HARUS cocok dengan nama kolom di tabel price_rules
+                            TextInput::make('min_pax')
+                                ->label('Min Peserta')
+                                ->numeric()
+                                ->required(),
+                            
+                            // Field ini HARUS cocok dengan nama kolom di tabel price_rules
+                            TextInput::make('max_pax')
+                                ->label('Max Peserta')
+                                ->numeric()
+                                ->nullable(),
+                            
+                            // Field ini HARUS cocok dengan nama kolom di tabel price_rules
+                            TextInput::make('price')
+                                ->label('Harga Perorang')
+                                ->numeric()
+                                ->prefix('IDR')
+                                ->required(),
+                        ])
+                        ->columns(3)
+                        ->addActionLabel('Tambah Tingkatan Harga')
+                        ->cloneable()
+                ]),
             ]);
     }
 
@@ -65,16 +75,34 @@ class HotelCostDetailResource extends Resource
     {
         return $table
             ->columns([
-            Tables\Columns\TextColumn::make('hotel_name')->label('Hotel Name')->searchable(),
-            Tables\Columns\TextColumn::make('star_rating')->label('Star Rating'),
-            Tables\Columns\TextColumn::make('price_50_pax')->label('Price 50 pax'),
-            Tables\Columns\TextColumn::make('price_11_12_pax')->label('Price 11–12 pax'),
-            Tables\Columns\TextColumn::make('price_8_10_pax')->label('Price 8–10 pax'),
-            Tables\Columns\TextColumn::make('price_6_7_pax')->label('Price 6–7 pax'),
-            Tables\Columns\TextColumn::make('price_3_5_pax')->label('Price 3–5 pax'),
-            Tables\Columns\TextColumn::make('price_2_pax')->label('Price 2 pax'),
-            Tables\Columns\TextColumn::make('single_sup')->label('Single Sup'),
-            Tables\Columns\TextColumn::make('created_at')->label('Created')->dateTime(),
+                // Kolom ini HARUS cocok dengan nama kolom di migrasi Anda
+                TextColumn::make('name')
+                    ->label('Hotel')
+                    ->searchable()
+                    ->sortable(),
+
+                // Kolom kalkulasi untuk harga berdasarkan Pax
+                TextColumn::make('harga_2_7_pax')
+                    ->label('Harga 2-7 Pax')
+                    ->state(function (HotelCostDetail $record): string {
+                        $price = $record->getPriceForPax(2);
+                        return !is_null($price) ? 'Rp ' . number_format($price, 0, ',', '.') : 'N/A';
+                    })
+                    ->sortable(false),
+
+                TextColumn::make('harga_8_11_pax')
+                    ->label('Harga 8-11 Pax')
+                    ->state(function (HotelCostDetail $record): string {
+                        $price = $record->getPriceForPax(8);
+                        return !is_null($price) ? 'Rp ' . number_format($price, 0, ',', '.') : 'N/A';
+                    })
+                    ->sortable(false),
+
+                // Kolom ini HARUS cocok dengan nama kolom di migrasi Anda
+                TextColumn::make('single_sup')
+                    ->label('Single Sup')
+                    ->money('IDR')
+                    ->sortable(),
             ])
             ->filters([
                 //
@@ -87,13 +115,6 @@ class HotelCostDetailResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('tour_itineraries', function (Blueprint $table) {
             $table->id();
-            $table->integer('day_number'); // misal Day 1, Day 2, dst
-            $table->string('day_title');   // misal: "Arrival in Jakarta – Bandung – Ciwidey Tour"
-            $table->string('location')->nullable(); // opsional
+            $table->string('title');
+            $table->string('location')->nullable();
             $table->timestamps();
         });
     }
