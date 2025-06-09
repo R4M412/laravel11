@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pulau_destinasis', function (Blueprint $table) {
+        Schema::create('price_tiers', function (Blueprint $table) {
             $table->id();
-            $table->string('gambar')->nullable();
-            $table->string('judul');
-            $table->text('deskripsi');
+            $table->foreignId('hotel_pricing_id')->constrained('hotel_pricings')->cascadeOnDelete();
+            $table->unsignedInteger('min_pax');
+            $table->unsignedInteger('max_pax')->nullable();
+            $table->unsignedInteger('price');
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pulau_destinasis');
+        Schema::dropIfExists('price_tiers');
     }
 };

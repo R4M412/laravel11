@@ -3,104 +3,126 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\WisataResource\Pages;
+use App\Filament\Resources\WisataResource\RelationManagers\HotelPricingsRelationManager; // Persiapan untuk nanti
 use App\Models\Wisata;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
+use Filament\Forms\Set;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Builder;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
 
 class WisataResource extends Resource
 {
     protected static ?string $model = Wisata::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-map';
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+    protected static ?string $navigationLabel = 'Paket Wisata';
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
         return $form
-        ->schema([
-            Forms\Components\FileUpload::make('gambar_thumbnail')
-                ->label('Gambar Thumbnail')
-                ->directory('wisata-images')
-                ->image()
-                ->nullable(),
+            ->schema([
+                Tabs::make('Form Paket Wisata')->tabs([
+                    
+                    Tabs\Tab::make('Informasi Umum')->schema([
+                        Grid::make(3)->schema([
+                            Section::make('Detail Utama')->columnSpan(2)->schema([
+                                TextInput::make('judul')->required()->live(onBlur: true)->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                                TextInput::make('slug')->required()->unique(Wisata::class, 'slug', ignoreRecord: true),
+                                Forms\Components\Select::make('kota_destinasi_id')->relationship('kotaDestinasi', 'judul')->required()->label('Pilih Kota Destinasi'),
+                                Textarea::make('deskripsi')->label('Deskripsi Singkat (untuk card)')->rows(3),
+                            ]),
+                            Section::make('Gambar')->columnSpan(1)->schema([
+                                FileUpload::make('gambar')->label('Gambar Utama Paket')->image()->directory('wisata-images'),
+                            ]),
+                        ]),
+                        Section::make('Overview Lengkap Paket')->schema([
+                             RichEditor::make('overview'),
+                        ]),
+                    ]),
 
-            Forms\Components\FileUpload::make('gambar_wisata')
-                ->label('Gambar Wisata')
-                ->directory('wisata-images')
-                ->image()
-                ->multiple()
-                ->nullable(),
+                    Tabs\Tab::make('Destinasi & Itinerary')->schema([
+                        Section::make('Daftar Destinasi Dalam Paket')->schema([
+                            Repeater::make('destinations')->label('')->schema([
+                                FileUpload::make('image')->label('Gambar Destinasi')->required(),
+                                TextInput::make('title')->label('Judul Destinasi')->required(),
+                            ])->grid(2)->addActionLabel('Tambah Destinasi'),
+                        ]),
+                        Section::make('Rencana Perjalanan (Itinerary)')->schema([
+                            Builder::make('itinerary')->label('')->blocks([
+                                Builder\Block::make('hari_kegiatan_deskripsi')->label('Hari Kegiatan (Format Deskripsi)')->schema([
+                                    TextInput::make('judul_hari')->required(),
+                                    RichEditor::make('deskripsi_kegiatan')->required(),
+                                ]),
+                                Builder\Block::make('hari_kegiatan_checklist')->label('Hari Kegiatan (Format Checklist)')->schema([
+                                    TextInput::make('judul_hari')->required(),
+                                    Textarea::make('aturan_pilihan')->placeholder('Contoh: Boleh checklist 2 aja dari 4 pilihan'),
+                                    Repeater::make('item_checklist')->schema([TextInput::make('item')]),
+                                ]),
+                            ])->addActionLabel('Tambah Hari Itinerary'),
+                        ]),
+                    ]),
 
-            Forms\Components\TextInput::make('judul')
-                ->label('Judul')
-                ->required()
-                ->maxLength(255),
+                    Tabs\Tab::make('Harga, Fasilitas & Catatan')->schema([
+                        Grid::make(2)->schema([
+                            Section::make('Harga Domestik (Rupiah)')->schema([
+                                TextInput::make('price_without_hotel')->label('Harga Tanpa Hotel (Per Pax)')->numeric()->prefix('Rp'),
+                                // Harga dengan hotel akan kita buat sebagai Relation Manager nanti agar lebih rapi
+                            ]),
+                            Section::make('Harga Turis Asing (USD)')->schema([
+                                Repeater::make('foreign_prices')->schema([
+                                    TextInput::make('pax_info')->label('Keterangan Pax')->placeholder('Contoh: 2-5 Pax'),
+                                    TextInput::make('price')->label('Harga per Pax')->numeric()->prefix('$'),
+                                ])->columns(2)->addActionLabel('Tambah Harga Asing'),
+                            ]),
+                        ]),
+                        Grid::make(2)->schema([
+                            Section::make('Fasilitas')->schema([
+                                Repeater::make('facilities_include')->label('Termasuk (Include)')->schema([TextInput::make('item')]),
+                                Repeater::make('facilities_exclude')->label('Tidak Termasuk (Exclude)')->schema([TextInput::make('item')]),
+                            ]),
+                            Section::make('Catatan Tambahan')->schema([
+                                RichEditor::make('remarks')->label('Remarks'),
+                            ]),
+                        ]),
+                    ]),
 
-            Forms\Components\Textarea::make('deskripsi')
-                ->label('Deskripsi')
-                ->required()
-                ->maxLength(1000),
-
-            Forms\Components\TextInput::make('harga_paket')
-                ->label('Harga Paket')
-                ->numeric()
-                ->required()
-                ->step(0.01)
-                ->suffix('Rp'),
-
-            Forms\Components\TextInput::make('transportasi')
-                ->label('Transportasi')
-                ->maxLength(255),
-
-            Forms\Components\TextInput::make('itenary')
-                ->label('Itenary')
-                ->maxLength(255),
-
-            Forms\Components\Textarea::make('fasilitas')
-                ->label('Fasilitas')
-                ->rows(3),
-
-            Forms\Components\TextInput::make('remarks')
-                ->label('Remarks')
-                ->maxLength(255),
-
-            Forms\Components\TextInput::make('additional')
-                ->label('Additional')
-                ->maxLength(255),
-        ]);
+                ])->columnSpanFull(),
+            ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
-        ->columns([
-            Tables\Columns\ImageColumn::make('gambar_thumbnail')->label('Gambar Thumbnail')->sortable(),
-            Tables\Columns\TextColumn::make('gambar_wisata')->label('Gambar Wisata')->limit(30),
-            Tables\Columns\TextColumn::make('judul')->label('Judul')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('deskripsi')->label('Deskripsi')->limit(30),
-            Tables\Columns\TextColumn::make('harga_paket')->label('Harga Paket')->money('IDR'),
-            Tables\Columns\TextColumn::make('transportasi')->label('Transportasi'),
-            Tables\Columns\TextColumn::make('itenary')->label('Itenary'),
-            Tables\Columns\TextColumn::make('fasilitas')->label('Fasilitas')->limit(30),
-            Tables\Columns\TextColumn::make('remarks')->label('Remarks')->limit(30),
-            Tables\Columns\TextColumn::make('additional')->label('Additional')->limit(30),
-            Tables\Columns\TextColumn::make('created_at')->label('Dibuat')->dateTime('d M Y'),
-        ])
-        ->filters([
-            //
-        ])
-        ->actions([
-            Tables\Actions\EditAction::make(),
-            Tables\Actions\DeleteAction::make(),
-        ])
-        ->bulkActions([
-            Tables\Actions\DeleteBulkAction::make(),
-        ]);
+            ->columns([
+                Tables\Columns\ImageColumn::make('gambar'),
+                Tables\Columns\TextColumn::make('judul')->searchable(),
+                Tables\Columns\TextColumn::make('kotaDestinasi.judul')->label('Kota')->searchable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('kotaDestinasi')->relationship('kotaDestinasi', 'judul'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([Tables\Actions\DeleteBulkAction::make()]),
+            ]);
     }
-
+    
     public static function getPages(): array
     {
         return [
@@ -108,5 +130,5 @@ class WisataResource extends Resource
             'create' => Pages\CreateWisata::route('/create'),
             'edit' => Pages\EditWisata::route('/{record}/edit'),
         ];
-    }
+    }    
 }
