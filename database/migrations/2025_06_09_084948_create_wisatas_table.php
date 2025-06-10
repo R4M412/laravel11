@@ -10,26 +10,24 @@ return new class extends Migration
     {
         Schema::create('wisatas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('kota_destinasi_id')->constrained('kota_destinasis')->cascadeOnDelete();
-            
-            // Info Dasar
             $table->string('judul');
             $table->string('slug')->unique();
-            $table->string('gambar')->nullable();
-            $table->text('deskripsi')->nullable();
+            $table->foreignId('kota_destinasi_id')->constrained()->cascadeOnDelete();
             
-            // Konten Detail (JSON)
-            $table->text('overview')->nullable();
+            // INI KOLOM UNTUK HARGA MANUAL ANDA
+            $table->string('display_price')->nullable()->comment('Teks harga untuk ditampilkan, cth: 750.000');
+
+            $table->text('deskripsi')->nullable();
+            $table->string('gambar')->nullable();
+            $table->longText('overview')->nullable();
             $table->json('destinations')->nullable();
             $table->json('itinerary')->nullable();
+            $table->json('land_tour_prices')->nullable();
+            $table->json('hotel_pricings')->nullable();
+            $table->json('foreign_guest_surcharges')->nullable();
             $table->json('facilities_include')->nullable();
             $table->json('facilities_exclude')->nullable();
-            $table->text('remarks')->nullable();
-            
-            // Harga
-            $table->decimal('price_without_hotel', 10, 2)->nullable();
-            $table->json('foreign_prices')->nullable();
-
+            $table->longText('remarks')->nullable();
             $table->timestamps();
         });
     }
