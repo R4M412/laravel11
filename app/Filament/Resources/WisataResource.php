@@ -99,21 +99,51 @@ class WisataResource extends Resource
                 ]),
 
                 Tabs\Tab::make('Rencana Perjalanan (Itinerary)')->schema([
-                    Section::make('Rencana Perjalanan Harian')->schema([
-                        Builder::make('itinerary')->label('')->blocks([
-                            Builder\Block::make('hari_kegiatan_deskripsi')->label('Hari Kegiatan (Format Deskripsi)')->schema([
-                                TextInput::make('judul_hari')->required(),
-                                RichEditor::make('deskripsi_kegiatan')->required(),
-                            ]),
-                            Builder\Block::make('hari_kegiatan_checklist')->label('Hari Kegiatan (Format Checklist)')->schema([
-                                TextInput::make('judul_hari')->required(),
-                                Textarea::make('aturan_pilihan')->placeholder('Contoh: Pilih 2 atraksi favorit dari daftar berikut'),
-                                Repeater::make('item_checklist')->schema([
-                                    TextInput::make('item')
+                    Section::make('Rencana Perjalanan Harian')
+                        ->description('Gunakan Repeater untuk menambah hari, lalu gunakan Builder di dalamnya untuk menyusun konten per hari.')
+                        ->schema([
+                            Repeater::make('itinerary')
+                                ->label('Hari Perjalanan')
+                                ->addActionLabel('Tambah Hari Baru')
+                                ->collapsible()
+                                ->itemLabel(fn (array $state): ?string => $state['judul_hari'] ?? 'Hari Baru')
+                                ->schema([
+                                    TextInput::make('judul_hari')
+                                        ->label('Judul Hari')
+                                        ->placeholder('Contoh: Day 01 - Jakarta - Ciwidey Tour')
+                                        ->required(),
+                                    
+                                    Builder::make('content_blocks')
+                                        ->label('Susunan Konten untuk Hari Ini')
+                                        ->addActionLabel('Tambah Blok Konten')
+                                        ->blocks([
+                                            Builder\Block::make('deskripsi')
+                                                ->label('Blok Deskripsi / Paragraf')
+                                                ->icon('heroicon-o-document-text')
+                                                ->schema([
+                                                    RichEditor::make('konten')
+                                                        ->label('Isi Deskripsi')
+                                                        ->required(),
+                                                ]),
+                                            
+                                            Builder\Block::make('checklist')
+                                                ->label('Blok Checklist Pilihan')
+                                                ->icon('heroicon-o-check-circle')
+                                                ->schema([
+                                                    Textarea::make('aturan_pilihan')
+                                                        ->label('Teks Aturan Pilihan')
+                                                        ->placeholder('Contoh: Pilih 2 atraksi favorit dari daftar berikut')
+                                                        ->rows(2),
+                                                    Repeater::make('item_checklist')
+                                                        ->label('Daftar Item untuk Checklist')
+                                                        ->schema([
+                                                            TextInput::make('item')->label('Nama Item')->required(),
+                                                        ])
+                                                        ->addActionLabel('Tambah Item Checklist'),
+                                                ]),
+                                        ]),
                                 ]),
-                            ]),
-                        ])->addActionLabel('Tambah Hari Itinerary'),
-                    ]),
+                        ]),
                 ]),
                 
                 Tabs\Tab::make('Rincian Harga, Fasilitas & Catatan')->schema([

@@ -19,7 +19,7 @@ class Wisata extends Model
         'gambar',
         'overview',
         'destinations',
-        'itinerary',
+        'itinerary', // <-- TAMBAHKAN BARIS INI
         'land_tour_prices',
         'hotel_pricings',
         'foreign_guest_surcharges',
@@ -30,7 +30,7 @@ class Wisata extends Model
 
     protected $casts = [
         'destinations' => 'array',
-        'itinerary' => 'array',
+        'itinerary' => 'array', // <-- TAMBAHKAN BARIS INI
         'land_tour_prices' => 'array',
         'hotel_pricings' => 'array',
         'foreign_guest_surcharges' => 'array',
