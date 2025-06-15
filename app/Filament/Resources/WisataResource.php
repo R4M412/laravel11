@@ -49,7 +49,17 @@ class WisataResource extends Resource
                                 ->label('Harga Tampil di Card (Start From)')
                                 ->placeholder('Contoh: 750.000')
                                 ->helperText('Teks harga ini akan tampil apa adanya di daftar paket.'),
-                            Forms\Components\Select::make('kota_destinasi_id')
+                            TextInput::make('duration_text')
+                                ->label('Durasi Paket (Teks)')
+                                ->placeholder('Contoh: 2 Hari 1 Malam')
+                                ->required(),
+                            TextInput::make('duration_days')
+                                ->label('Durasi Paket (Angka Hari)')
+                                ->numeric()
+                                ->minValue(1)
+                                ->helperText('Isi dengan angka HARI-nya saja. Contoh: untuk 2D1N, isi 2.')
+                                ->required(),
+                                Forms\Components\Select::make('kota_destinasi_id')
                                 ->relationship('kotaDestinasi', 'judul')
                                 ->required()
                                 ->label('Pilih Kota Destinasi'),
@@ -176,13 +186,16 @@ class WisataResource extends Resource
                     ]),
                     Grid::make(2)->schema([
                         Section::make('Fasilitas')->schema([
-                            Repeater::make('facilities_include')->label('Termasuk (Include)')->schema([
-                                TextInput::make('item')
-                            ])->addActionLabel('Tambah Item'),
-                            Repeater::make('facilities_exclude')->label('Tidak Termasuk (Exclude)')->schema([
-                                TextInput::make('item')
-                            ])->addActionLabel('Tambah Item'),
-                        ]),
+                        RichEditor::make('facilities_include_text')
+                            ->label('Fasilitas Termasuk (Include)')
+                            ->helperText('Masukkan semua fasilitas yang termasuk dalam paket.')
+                            ->required(),
+
+                        RichEditor::make('facilities_exclude_text')
+                            ->label('Fasilitas Tidak Termasuk (Exclude)')
+                            ->helperText('Masukkan semua fasilitas yang TIDAK termasuk dalam paket.')
+                            ->required(),
+                        ])->columns(1), // Ini biar editornya urut ke bawah, bukan nyamping
                         Section::make('Catatan Tambahan')->schema([
                             RichEditor::make('remarks')->label('Remarks'),
                         ]),

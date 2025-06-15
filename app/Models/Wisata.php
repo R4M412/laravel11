@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany; // <-- TAMBAHKAN USE STATEMENT INI
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Wisata extends Model
 {
@@ -21,6 +21,8 @@ class Wisata extends Model
         'slug',
         'kota_destinasi_id',
         'display_price',
+        'duration_text',
+        'duration_days',
         'deskripsi',
         'gambar',
         'overview',
@@ -29,9 +31,11 @@ class Wisata extends Model
         'land_tour_prices',
         'hotel_pricings',
         'foreign_guest_surcharges',
-        'facilities_include',
-        'facilities_exclude',
+        // 'facilities_include', // DIHAPUS
+        // 'facilities_exclude', // DIHAPUS
         'remarks',
+        'facilities_include_text', // DITAMBAH
+        'facilities_exclude_text', // DITAMBAH
     ];
 
     /**
@@ -45,8 +49,8 @@ class Wisata extends Model
         'land_tour_prices' => 'array',
         'hotel_pricings' => 'array',
         'foreign_guest_surcharges' => 'array',
-        'facilities_include' => 'array',
-        'facilities_exclude' => 'array',
+        // 'facilities_include' => 'array', // DIHAPUS
+        // 'facilities_exclude' => 'array', // DIHAPUS
     ];
 
     /**
